@@ -17,6 +17,13 @@ default_platform(:ios)
 
 platform :ios do
   lane :release do
-  build_app(scheme: "fastLaneLogin")
-	end
+    # Ensure provisioning profiles and certificates are in place before building
+    match(type: "appstore")  
+
+    # Build the app using the correct scheme and export method
+    build_app(
+      scheme: "fastLaneLogin",
+      export_method: "app-store"  # Corrected export method for App Store builds
+    )
+  end
 end
