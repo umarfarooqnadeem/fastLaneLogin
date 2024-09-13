@@ -10,6 +10,7 @@ jobs:
       - run:
           name: Install Ruby and Bundler
           command: |
+            rbenv install 3.1.2  # Use a valid Ruby version
             rbenv global 3.1.2
             gem install bundler
 
