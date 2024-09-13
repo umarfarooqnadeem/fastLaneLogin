@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Install Ruby and Bundler
           command: |
-            rbenv global 3.2.2
+            rbenv global 3.1.2
             gem install bundler
 
   # Build and deploy release variant
