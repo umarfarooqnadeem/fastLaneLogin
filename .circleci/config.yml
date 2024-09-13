@@ -62,4 +62,4 @@ workflows:
           filters:
             branches:
               only:
-                - main  # Branch for release builds
+                - circleci-project-setup  # Branch for release builds
