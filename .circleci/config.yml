@@ -31,7 +31,7 @@ commands:
 executors:
   macos_executor:
     macos:
-      xcode: "15.4"  # Specify the Xcode version needed
+      xcode: "15.4.0"  # Specify the Xcode version needed
 
 # Define jobs to be invoked later in a workflow.
 jobs:
