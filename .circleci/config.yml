@@ -1,19 +1,6 @@
 version: 2.1
 
 jobs:
-  # Install Ruby and Bundler
-  install-Ruby:
-    macos:
-      xcode: "15.4.0"  # Specify the Xcode version needed
-    steps:
-      - checkout
-      - run:
-          name: Install Ruby and Bundler
-          command: |
-            rbenv install 3.1.6  # Use a valid Ruby version
-            rbenv global 3.1.6
-            gem install bundler
-
   # Build and deploy release variant
   build-release-and-deploy:
     macos:
@@ -36,10 +23,7 @@ jobs:
 workflows:
   release:
     jobs:
-      - install-Ruby  # Install Ruby first
       - build-release-and-deploy:
-          requires:
-            - install-Ruby  # Make sure Ruby is installed before building
           filters:
             branches:
               only:
