@@ -1,58 +1,10 @@
 version: 2.1
 
-# Define commands to be used in jobs.
-commands:
-  # Decode and build credentials (e.g., provisioning profiles, certificates)
-  decode-and-build-credentials:
-    description: "Decode and build credentials"
-    steps:
-      - run:
-          name: Decode credentials
-          command: |
-            mkdir -p certificates provisioning
-            echo "$CERTIFICATES_BASE64" | base64 --decode > certificates/certificates.p12
-            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > provisioning/provisioning_profile.mobileprovision
-
-  # Increment build number
-  increment-build-number:
-    description: "Increment build number"
-    steps:
-      - run:
-          name: Increment build number
-          command: |
-            # Get the current build number from the Info.plist
-            build_number=$(agvtool what-version -terse)
-            # Increment the build number
-            new_build_number=$((build_number + 1))
-            # Set the new build number
-            agvtool new-marketing-version $new_build_number
-
-# Use the macOS executor provided by CircleCI
-executors:
-  macos_executor:
-    macos:
-      xcode: "15.4.0"  # Specify the Xcode version needed
-
-# Define jobs to be invoked later in a workflow.
 jobs:
-  # Build and deploy release variant
-  build-release-and-deploy:
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: bundle install
-      - decode-and-build-credentials
-      - increment-build-number
-      - run:
-          name: Build release variant
-          command: bundle exec fastlane build_release
-      - store_artifacts:
-          path: fastlane/release-artifacts
-      - run:
-          name: Upload to TestFlight
-          command: bundle exec fastlane testflight
+  # Install Ruby and Bundler
   install-Ruby:
+    macos:
+      xcode: "14.3.0"  # Specify the Xcode version needed
     steps:
       - checkout
       - run:
@@ -61,15 +13,34 @@ jobs:
             rbenv install 3.3.0
             rbenv global 3.3.0
             gem install bundler
+
+  # Build and deploy release variant
+  build-release-and-deploy:
+    macos:
+      xcode: "14.3.0"  # Specify the Xcode version needed
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: bundle install
+      - run:
+          name: Build release variant
+          command: bundle exec fastlane build_release
+      - store_artifacts:
+          path: fastlane/release-artifacts
+      - run:
+          name: Upload to TestFlight
+          command: bundle exec fastlane testflight
+
 # Define workflows to manage job execution.
 workflows:
   release:
     jobs:
-     - install-Ruby  # Install Ruby first
+      - install-Ruby  # Install Ruby first
       - build-release-and-deploy:
           requires:
             - install-Ruby  # Make sure Ruby is installed before building
           filters:
             branches:
               only:
-                - circleci-project-setup  # Branch for release builds
+                - main  # Branch for release builds
