@@ -9,6 +9,7 @@ commands:
       - run:
           name: Decode credentials
           command: |
+            mkdir -p certificates provisioning
             echo "$CERTIFICATES_BASE64" | base64 --decode > certificates/certificates.p12
             echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > provisioning/provisioning_profile.mobileprovision
 
@@ -26,18 +27,17 @@ commands:
             # Set the new build number
             agvtool new-marketing-version $new_build_number
 
-# Define executors directly
+# Use the macOS executor provided by CircleCI
 executors:
-  macos:
-    docker:
-      - image: circleci/macos:latest
+  macos_executor:
+    macos:
+      xcode: "14.3.0"  # Specify the Xcode version needed
 
 # Define jobs to be invoked later in a workflow.
 jobs:
   # Build and deploy release variant
   build-release-and-deploy:
-    executor:
-      name: macos
+    executor: macos_executor
     steps:
       - checkout
       - run:
