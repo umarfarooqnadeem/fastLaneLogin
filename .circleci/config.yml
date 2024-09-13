@@ -1,13 +1,4 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/configuration-reference
-
-# For a detailed guide to building and testing on iOS, read the docs:
-# https://circleci.com/docs/testing-ios/
 version: 2.1
-
-# Define reusable configuration using CircleCI orbs.
-orbs:
-  apple: circleci/xcode@2.2.0  # Use the Xcode orb for iOS jobs
 
 # Define commands to be used in jobs.
 commands:
@@ -35,45 +26,25 @@ commands:
             # Set the new build number
             agvtool new-marketing-version $new_build_number
 
+# Define executors directly
+executors:
+  macos:
+    docker:
+      - image: circleci/macos:latest
+
 # Define jobs to be invoked later in a workflow.
 jobs:
-  # Build and deploy debug variant
-  build-debug-and-deploy:
-    executor:
-      name: macos/macos
-      resource-class: large
-    steps:
-      - checkout
-      - apple/setup-xcode:
-          version: "14.3"  # Specify the Xcode version
-      - decode-and-build-credentials
-      - increment-build-number  # Increment the build number
-      - run:
-          name: Install dependencies
-          command: bundle install
-      - run:
-          name: Build debug variant
-          command: bundle exec fastlane build_debug
-      - store_artifacts:
-          path: fastlane/debug-artifacts
-      - run:
-          name: Upload to TestFlight
-          command: bundle exec fastlane testflight_debug
-
   # Build and deploy release variant
   build-release-and-deploy:
     executor:
-      name: macos/macos
-      resource-class: large
+      name: macos
     steps:
       - checkout
-      - apple/setup-xcode:
-          version: "14.3"  # Specify the Xcode version
-      - decode-and-build-credentials
-      - increment-build-number  # Increment the build number
       - run:
           name: Install dependencies
           command: bundle install
+      - decode-and-build-credentials
+      - increment-build-number
       - run:
           name: Build release variant
           command: bundle exec fastlane build_release
@@ -85,17 +56,6 @@ jobs:
 
 # Define workflows to manage job execution.
 workflows:
-  version: 2
-  # Build debug variant and deploy to TestFlight
-  debug:
-    jobs:
-      - build-debug-and-deploy:
-          filters:
-            branches:
-              only:
-                - develop  # Branch for debug builds
-
-  # Build release variant and deploy to TestFlight
   release:
     jobs:
       - build-release-and-deploy:
