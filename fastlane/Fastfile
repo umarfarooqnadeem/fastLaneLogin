@@ -18,7 +18,9 @@ default_platform(:ios)
 platform :ios do
   lane :release do
     # Ensure provisioning profiles and certificates are in place before building
-    match(type: "appstore")  
+     match(
+      type: "appstore",              # Type of profile, e.g., "appstore" for App Store distribution
+    ) 
 
     # Build the app using the correct scheme and export method
     build_app(
